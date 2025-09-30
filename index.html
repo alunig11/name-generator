@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Name Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center font-sans px-6">
+
+  <!-- Header -->
+  <h1 class="text-4xl font-bold text-gray-900 mb-10 tracking-tight text-center">
+    Name Generator
+  </h1>
+
+  <!-- Input -->
+  <input 
+    id="appName" 
+    type="text" 
+    placeholder="Enter text here"
+    class="w-full max-w-md px-6 py-4 mb-6 rounded-full border border-gray-300 text-gray-800 
+           focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500 outline-none
+           text-xl shadow-sm bg-white"
+  >
+
+  <!-- Generate Button -->
+  <button 
+    onclick="generate()"
+    class="w-full max-w-md py-4 rounded-full text-xl font-semibold 
+           bg-indigo-600 text-white shadow-sm
+           hover:bg-indigo-700 active:scale-95 transition"
+  >
+    Generate
+  </button>
+
+  <!-- Result with copy button -->
+  <div id="resultContainer" class="mt-10 flex items-center justify-center gap-3">
+    <div id="result" class="text-3xl font-bold text-indigo-700 tracking-wide text-center"></div>
+    <button id="copyBtn" 
+            onclick="copyResult()" 
+            class="hidden px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300 
+                   active:scale-95 transition text-gray-700 text-base font-medium shadow-sm">
+      Copy
+    </button>
+  </div>
+
+  <script>
+    const adjectives = [
+      "arcane","argent","astral","barren","basalt","bleak","bright","brisk","broken",
+      "carven","cerule","cosmic","crimson","distant","fervent","fervid","frozen","gaunt",
+      "gentle","golden","lucid","lunar","molten","mystic","mythic","obsidian","occult",
+      "ornate","pastel","pious","prime","quiet","radiant","rustic","serene","silent",
+      "silver","solemn","starlit","static","steady","stellar","subtle","sudden",
+      "tender","tranquil","umbral","verdant","vivid"
+    ];
+
+    const nouns = [
+      "aether","anchor","atlas","beacon","boulder","bramble","breeze","canyon","cedar",
+      "chasm","cobalt","comet","crypt","crystal","desert","ember","fable","forest",
+      "frost","glade","grove","harbor","hollow","ivory","lagoon","lantern","marble",
+      "meadow","mirror","ocean","orchid","palace","pearl","pillar","planet","plume",
+      "quartz","ravine","relic","sable","shadow","shrine","spiral","summit",
+      "talon","temple","totem","vessel","willow","zenith"
+    ];
+
+    function hashString(str) {
+      let hash = 5381;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash) + str.charCodeAt(i);
+        hash = hash & 0xFFFFFFFF;
+      }
+      return Math.abs(hash);
+    }
+
+    function generate() {
+      const input = document.getElementById("appName").value.trim();
+      const resultEl = document.getElementById("result");
+      const copyBtn = document.getElementById("copyBtn");
+
+      if (!input) {
+        resultEl.innerText = "Please enter a name.";
+        copyBtn.classList.add("hidden");
+        return;
+      }
+
+      const hash = hashString(input.toLowerCase());
+      const adj = adjectives[hash % adjectives.length];
+      const noun = nouns[(Math.floor(hash / adjectives.length)) % nouns.length];
+      const result = `${adj}.${noun}`;
+
+      resultEl.innerText = result;
+      copyBtn.classList.remove("hidden");
+    }
+
+    function copyResult() {
+      const text = document.getElementById("result").innerText;
+      if (!text) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById("copyBtn");
+        btn.innerText = "Copied!";
+        btn.classList.add("bg-green-500","text-white");
+        setTimeout(() => {
+          btn.innerText = "Copy";
+          btn.classList.remove("bg-green-500","text-white");
+        }, 1500);
+      });
+    }
+
+    document.getElementById("appName").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        generate();
+      }
+    });
+  </script>
+</body>
+</html>
