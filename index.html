@@ -4,141 +4,190 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Name Generator</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #1c1e21;
+      padding: 15px;
+    }
+
+    .tool-card {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .section-title {
+      font-weight: 700;
+      color: #003087;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #6c757d;
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .form-control {
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #ced4da;
+      font-size: 0.95rem;
+    }
+
+    .peso-display {
+      background-color: #f0f7ff;
+      border: 1px solid #cfe2ff;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 10px;
+      cursor: pointer;
+      border-style: dashed;
+      transition: all 0.2s ease;
+    }
+
+    .peso-display:hover {
+      background-color: #e6f2ff;
+      border-color: #0070ba;
+    }
+
+    .peso-total { 
+      font-size: 2.2rem; 
+      font-weight: 800; 
+      color: #0070ba; 
+      letter-spacing: 1px;
+    }
+
+    .hidden { display: none; }
+    
+    .fade-out { 
+      opacity: 1; 
+      transition: opacity 0.5s ease; 
+      text-align: center;
+      display: block;
+      height: 20px;
+    }
+    
+    .fade-out.hidden { opacity: 0; }
+
+    .input-group-text {
+      background-color: #f8f9fa;
+      border-color: #ced4da;
+      color: #6c757d;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center font-sans px-6">
+<body>
 
-  <!-- Header -->
-  <h1 class="text-4xl font-bold text-gray-900 mb-10 tracking-tight text-center">
-    Name Generator
-  </h1>
-
-  <!-- Input -->
-  <input 
-    id="appName" 
-    type="text" 
-    placeholder="Enter text here"
-    class="w-full max-w-md px-6 py-4 mb-6 rounded-full border border-gray-300 text-gray-800 
-           focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500 outline-none
-           text-xl shadow-sm bg-white"
-  >
-
-  <!-- Results -->
-  <div id="resultContainer" class="mt-10 space-y-4 w-full max-w-md"></div>
+  <div class="tool-card">
+    <h4 class="section-title"><i class="fa-solid fa-fingerprint me-2"></i> Name Generator</h4>
+    
+    <div class="mb-4">
+      <label class="form-label">Configuration Key</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+        <input type="password" id="gen_salt" class="form-control" placeholder="••••••••" onchange="saveGenSalt()">
+      </div>
+    </div>
+    
+    <div class="mb-4">
+      <label class="form-label">Reference Name</label>
+      <input type="text" id="gen_input" class="form-control" placeholder="e.g. Reddit, Uber, GOMO" oninput="runGenerator()">
+    </div>
+    
+    <div class="position-relative">
+      <label class="form-label">Generated Identifier</label>
+      <div id="genResultBox" class="peso-display" onclick="copyGenResult()">
+        <div class="peso-total" id="gen_output">------</div>
+        <div class="text-muted small mt-1">Click box to copy</div>
+      </div>
+      <div id="genCopyAlert" class="text-success mt-2 fade-out hidden" style="font-size: 0.8rem; font-weight: bold;">
+        <i class="fa-solid fa-check me-1"></i> Copied to clipboard
+      </div>
+    </div>
+  </div>
 
   <script>
-    const VOWELS = ["a","e","i","o","u"];
-
-    // Families
-    const VCV_SUFFIXES = ["aru", "ume", "ino", "osu", "eli"]; // base ends with consonant
-    const CVC_SUFFIXES = ["rem", "lin", "tal", "por", "sud"]; // base ends with vowel
-
-    // Helpers
-    function lastVowelOfBase(base) {
-      for (let i = base.length - 1; i >= 0; i--) {
-        const ch = base[i];
-        if (VOWELS.includes(ch)) return ch;
+    // Load saved key on startup
+    window.onload = () => {
+      const savedSalt = localStorage.getItem('gen_salt');
+      if (savedSalt) {
+        document.getElementById('gen_salt').value = savedSalt;
       }
-      return null;
+    };
+
+    function saveGenSalt() {
+      localStorage.setItem('gen_salt', document.getElementById('gen_salt').value);
+      runGenerator();
     }
 
-    function coreVowelOfSuffix(suf, isVCV) {
-      return isVCV ? suf[0] : suf[1]; // VCV: first char; CVC: middle char
-    }
+    async function runGenerator() {
+      // Normalization: Lowercase and strip ALL whitespace (including middle spaces)
+      const rawInput = document.getElementById('gen_input').value;
+      const input = rawInput.toLowerCase().replace(/\s+/g, '');
+      const salt = document.getElementById('gen_salt').value;
+      const outputEl = document.getElementById('gen_output');
 
-    function areAdjacentVowels(a, b) {
-      if (!a || !b) return false;
-      const ring = ["a","e","i","o","u"];
-      const ia = ring.indexOf(a), ib = ring.indexOf(b);
-      if (ia === -1 || ib === -1) return false;
-      const left = (ia - 1 + ring.length) % ring.length;
-      const right = (ia + 1) % ring.length;
-      return ib === left || ib === right;
-    }
-
-    function scoreAlias(base, suf, isVCV) {
-      const alias = base + suf;
-      let score = 0;
-
-      // Boundary transition (always +2 in your rule sets)
-      score += 2;
-
-      // Vowel harmony
-      const lv = lastVowelOfBase(base);
-      const sv = coreVowelOfSuffix(suf, isVCV);
-      if (lv && sv) {
-        if (lv === sv) score -= 2;
-        else if (areAdjacentVowels(lv, sv)) score += 1;
+      if (!input || !salt) {
+        outputEl.innerText = "------";
+        return;
       }
 
-      // Ending softness
-      const end = alias.slice(-1);
-      if (["n","l","m"].includes(end)) score += 1;
-      if (["u","i"].includes(end)) score += 1;
-      if (["r","d","t"].includes(end)) score -= 1;
+      // Cryptographic Logic (Deterministic SHA-256 to Base36)
+      const encoder = new TextEncoder();
+      const data = encoder.encode(input + salt);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hexString = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const bigIntHash = BigInt("0x" + hexString);
+      const base36 = bigIntHash.toString(36);
 
-      // Length sanity
-      if (alias.length > 10) score -= 1;
-
-      return { alias, score };
+      // Slice 6 characters (starting at index 7 for entropy)
+      const result = base36.substring(7, 13);
+      outputEl.innerText = result;
     }
 
-    function generate() {
-      const raw = document.getElementById("appName").value.trim().toLowerCase();
-      const container = document.getElementById("resultContainer");
-      container.innerHTML = "";
-      if (!raw) return;
+    function copyGenResult() {
+      const text = document.getElementById('gen_output').innerText;
+      if (text === "------") return;
+      
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
 
-      const base = raw;
-      const endsWithVowel = VOWELS.includes(base.slice(-1));
-      const isVCV = !endsWithVowel;
-      const suffixes = isVCV ? VCV_SUFFIXES : CVC_SUFFIXES;
-
-      const ranked = suffixes
-        .map(suf => scoreAlias(base, suf, isVCV))
-        .sort((a, b) => b.score - a.score || a.alias.localeCompare(b.alias));
-
-      const maxScore = ranked[0].score;
-      const minScore = ranked[ranked.length - 1].score;
-
-      ranked.forEach(({ alias, score }) => {
-        const row = document.createElement("div");
-        row.className = "flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow";
-
-        const text = document.createElement("span");
-        text.className = "text-xl font-bold";
-
-        if (score === maxScore) {
-          text.classList.add("text-green-600");
-        } else if (score === minScore) {
-          text.classList.add("text-red-600");
-        } else {
-          text.classList.add("text-indigo-700");
-        }
-
-        text.innerText = alias;
-
-        const copyBtn = document.createElement("button");
-        copyBtn.innerText = "Copy";
-        copyBtn.className = "px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium";
-        copyBtn.onclick = () => {
-          navigator.clipboard.writeText(alias).then(() => {
-            copyBtn.innerText = "Copied!";
-            copyBtn.classList.add("bg-green-500","text-white");
-            setTimeout(() => {
-              copyBtn.innerText = "Copy";
-              copyBtn.classList.remove("bg-green-500","text-white");
-            }, 1200);
-          });
-        };
-
-        row.appendChild(text);
-        row.appendChild(copyBtn);
-        container.appendChild(row);
-      });
+      const alert = document.getElementById('genCopyAlert');
+      alert.classList.remove('hidden');
+      setTimeout(() => alert.classList.add('hidden'), 2000);
     }
-
-    document.getElementById("appName").addEventListener("input", generate);
   </script>
+
 </body>
 </html>
