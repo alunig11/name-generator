@@ -3,23 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Name Generator | v1.0</title>
+  <title>Name Generator</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --font-main: "Google Sans", "Open Sans", "Segoe UI", Roboto, Arial, sans-serif;
-      --google-blue: #1a73e8;
-      --google-blue-dark: #174ea6;
-      --google-grey: #5f6368;
-    }
-
     body {
       height: 100vh;
       margin: 0;
@@ -27,7 +19,7 @@
       align-items: center;
       justify-content: center;
       background-color: #f8f9fa;
-      font-family: var(--font-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: #1c1e21;
       padding: 15px;
     }
@@ -39,7 +31,6 @@
       border: 1px solid #dee2e6;
       width: 100%;
       max-width: 450px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     .section-title {
@@ -49,47 +40,45 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      letter-spacing: -0.5px;
     }
 
     .form-label {
-      font-weight: 700;
-      color: var(--google-grey);
+      font-weight: 600;
+      color: #6c757d;
       font-size: 0.75rem;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.25rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
 
     .form-control {
       border-radius: 8px;
       padding: 12px;
-      border: 1px solid #dadce0;
+      border: 1px solid #ced4da;
       font-size: 0.95rem;
-      font-family: var(--font-main);
     }
 
-    .result-display {
-      background-color: #f8f9fa;
-      border: 1px solid #dadce0;
-      border-radius: 24px; /* Matching the Icon Generator radius */
+    .peso-display {
+      background-color: #f0f7ff;
+      border: 1px solid #cfe2ff;
+      border-radius: 12px;
       padding: 24px;
       text-align: center;
       margin-top: 10px;
       cursor: pointer;
       border-style: dashed;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
     }
 
-    .result-display:hover {
-      background-color: #f1f3f4;
-      border-color: var(--google-blue);
+    .peso-display:hover {
+      background-color: #e6f2ff;
+      border-color: #0070ba;
     }
 
-    .id-output { 
+    .peso-total { 
       font-size: 2.2rem; 
-      font-weight: 500; /* Google Sans looks better at 500 for identifiers */
-      color: var(--google-blue); 
+      font-weight: 800; 
+      color: #0070ba; 
       letter-spacing: 1px;
     }
 
@@ -106,9 +95,9 @@
     .fade-out.hidden { opacity: 0; }
 
     .input-group-text {
-      background-color: #f1f3f4;
-      border-color: #dadce0;
-      color: var(--google-grey);
+      background-color: #f8f9fa;
+      border-color: #ced4da;
+      color: #6c757d;
     }
   </style>
 </head>
@@ -120,32 +109,30 @@
     <div class="mb-4">
       <label class="form-label">Configuration Key</label>
       <div class="input-group">
-        <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
-        <input type="tel" id="gen_salt" class="form-control" placeholder="••••••••" onchange="saveGenSalt()" maxlength="8">
+        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+        <input type="password" id="gen_salt" class="form-control" placeholder="••••••" onchange="saveGenSalt()">
       </div>
     </div>
     
     <div class="mb-4">
       <label class="form-label">Reference Name</label>
-      <div class="input-group">
-        <span class="input-group-text"><i class="fa-solid fa-link"></i></span>
-        <input type="text" id="gen_input" class="form-control" placeholder="e.g. Uber, GOMO" oninput="runGenerator()">
-      </div>
+      <input type="text" id="gen_input" class="form-control" placeholder="••••••" oninput="runGenerator()">
     </div>
     
     <div class="position-relative">
       <label class="form-label">Generated Identifier</label>
-      <div id="genResultBox" class="result-display" onclick="copyGenResult()">
-        <div class="id-output" id="gen_output">--------</div>
-        <div class="text-muted small mt-1" style="font-weight: 500;">Click to copy</div>
+      <div id="genResultBox" class="peso-display" onclick="copyGenResult()">
+        <div class="peso-total" id="gen_output">••••••</div>
+        <div class="text-muted small mt-1">Click box to copy</div>
       </div>
-      <div id="genCopyAlert" class="text-success mt-2 fade-out hidden" style="font-size: 0.8rem; font-weight: 700;">
-        <i class="fa-solid fa-check-circle me-1"></i> Copied to clipboard
+      <div id="genCopyAlert" class="text-success mt-2 fade-out hidden" style="font-size: 0.8rem; font-weight: bold;">
+        <i class="fa-solid fa-check me-1"></i> Copied to clipboard
       </div>
     </div>
   </div>
 
   <script>
+    // Load saved key on startup
     window.onload = () => {
       const savedSalt = localStorage.getItem('gen_salt');
       if (savedSalt) {
@@ -159,16 +146,18 @@
     }
 
     async function runGenerator() {
+      // Normalization: Lowercase and strip ALL whitespace (including middle spaces)
       const rawInput = document.getElementById('gen_input').value;
       const input = rawInput.toLowerCase().replace(/\s+/g, '');
       const salt = document.getElementById('gen_salt').value;
       const outputEl = document.getElementById('gen_output');
 
       if (!input || !salt) {
-        outputEl.innerText = "--------";
+        outputEl.innerText = "------";
         return;
       }
 
+      // Cryptographic Logic (Deterministic SHA-256 to Base36)
       const encoder = new TextEncoder();
       const data = encoder.encode(input + salt);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -176,21 +165,27 @@
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hexString = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       const bigIntHash = BigInt("0x" + hexString);
-      
-      // Base36 for alphanumeric output, consistent 8-character slice
-      const result = bigIntHash.toString(36).substring(10, 18);
+      const base36 = bigIntHash.toString(36);
+
+      // Slice 6 characters (starting at index 7 for entropy)
+      const result = base36.substring(7, 13);
       outputEl.innerText = result;
     }
 
     function copyGenResult() {
       const text = document.getElementById('gen_output').innerText;
-      if (text === "--------") return;
+      if (text === "------") return;
       
-      navigator.clipboard.writeText(text).then(() => {
-        const alert = document.getElementById('genCopyAlert');
-        alert.classList.remove('hidden');
-        setTimeout(() => alert.classList.add('hidden'), 2000);
-      });
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      const alert = document.getElementById('genCopyAlert');
+      alert.classList.remove('hidden');
+      setTimeout(() => alert.classList.add('hidden'), 2000);
     }
   </script>
 
